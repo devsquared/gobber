@@ -9,24 +9,28 @@ import "fmt"
 //		- Left Child: 2 * i + 1
 // 		- Right Child: 2 * i + 2
 
+// MaxHeap represents a heap with the max values towards the top
 type MaxHeap struct {
-	heap []node
+	heap []Node
 }
 
+// NewMaxHeap is a simple constructor to get a max heap.
 func NewMaxHeap() *MaxHeap {
 	return &MaxHeap{
-		heap: []node{},
+		heap: []Node{},
 	}
 }
 
-func (b *MaxHeap) Add(node node) {
+// Add inserts a new node into the MaxHeap. After adding, the MaxHeap fixes the remaining nodes ordering.
+func (b *MaxHeap) Add(node Node) {
 	b.heap = append(b.heap, node)
 	b.bubbleUp(len(b.heap) - 1) // bubble up the new node
 }
 
+// Pop removes the max keyed node from the MaxHeap. After removing, the MaxHeap fixes the remaining nodes ordering.
 func (b *MaxHeap) Pop() (any, error) {
 	if len(b.heap) <= 0 {
-		return nil, fmt.Errorf("binary heap: remove called on empty heap")
+		return nil, fmt.Errorf("max heap: pop called on empty heap")
 	}
 
 	removed := b.heap[0]
@@ -44,7 +48,7 @@ func (b *MaxHeap) Pop() (any, error) {
 
 func (b *MaxHeap) GetFirstValue() (any, error) {
 	if len(b.heap) <= 0 {
-		return nil, fmt.Errorf("binary heap: get first value called on empty heap")
+		return nil, fmt.Errorf("max heap: get first value called on empty heap")
 	}
 
 	return b.heap[0].value, nil
