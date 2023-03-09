@@ -106,7 +106,6 @@ func TestMaxHeap_Pop(t *testing.T) {
 	}
 
 	for _, ts := range testScenarios {
-		// add the new input node
 		actualValue, actualErr := ts.startingHeap.Pop()
 
 		if actualErr != nil && ts.expectedErr != nil {
@@ -122,6 +121,76 @@ func TestMaxHeap_Pop(t *testing.T) {
 		actualHeap := ts.startingHeap.heap
 		if !reflect.DeepEqual(actualHeap, ts.expectedRemainingHeap) {
 			t.Fatalf(reportTestFailure(ts.name, actualHeap, ts.expectedRemainingHeap))
+		}
+	}
+}
+
+func TestMaxHeap_GetFirstValue(t *testing.T) {
+	type scenario struct {
+		name          string
+		heap          *MaxHeap
+		expectedValue any
+		expectedErr   error
+		expectedHeap  []Node
+	}
+
+	maxHeapWithHigh := NewMaxHeap()
+	maxHeapWithHigh.Add(NewNode(99, "testing it all!"))
+
+	maxHeapWithSpread := NewMaxHeap()
+	maxHeapWithSpread.Add(NewNode(0, "yee"))
+	maxHeapWithSpread.Add(NewNode(99, "haw"))
+
+	maxHeapWithFiveNodes := NewMaxHeap()
+	maxHeapWithFiveNodes.Add(NewNode(0, 0))
+	maxHeapWithFiveNodes.Add(NewNode(50, 50))
+	maxHeapWithFiveNodes.Add(NewNode(200, 200))
+	maxHeapWithFiveNodes.Add(NewNode(100, 100))
+	maxHeapWithFiveNodes.Add(NewNode(999999, 999999))
+
+	testScenarios := []scenario{
+		{
+			name:         "try to get first value from empty heap",
+			heap:         NewMaxHeap(),
+			expectedErr:  fmt.Errorf("max heap: get first value called on empty heap"),
+			expectedHeap: []Node{},
+		},
+		{
+			name:          "get from only single node heap",
+			heap:          maxHeapWithHigh,
+			expectedValue: "testing it all!",
+			expectedHeap:  []Node{NewNode(99, "testing it all!")},
+		},
+		{
+			name:          "get max value from heap with 2 nodes",
+			heap:          maxHeapWithSpread,
+			expectedValue: "haw",
+			expectedHeap:  []Node{NewNode(99, "haw"), NewNode(0, "yee")},
+		},
+		{
+			name:          "get max value from heap with multiple nodes",
+			heap:          maxHeapWithFiveNodes,
+			expectedValue: 999999,
+			expectedHeap:  []Node{NewNode(999999, 999999), NewNode(200, 200), NewNode(50, 50), NewNode(0, 0), NewNode(100, 100)},
+		},
+	}
+
+	for _, ts := range testScenarios {
+		actualValue, actualErr := ts.heap.GetFirstValue()
+
+		if actualErr != nil && ts.expectedErr != nil {
+			if actualErr.Error() != ts.expectedErr.Error() {
+				t.Fatalf(reportTestFailure(ts.name, actualErr, ts.expectedErr))
+			}
+		}
+
+		if actualValue != ts.expectedValue {
+			t.Fatalf(reportTestFailure(ts.name, actualValue, ts.expectedValue))
+		}
+
+		actualHeap := ts.heap.heap
+		if !reflect.DeepEqual(actualHeap, ts.expectedHeap) {
+			t.Fatalf(reportTestFailure(ts.name, actualHeap, ts.expectedHeap))
 		}
 	}
 }

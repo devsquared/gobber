@@ -46,6 +46,8 @@ func (b *MaxHeap) Pop() (any, error) {
 	return removed.value, nil
 }
 
+// GetFirstValue returns the value from the max node of the heap. This does not remove this node from the heap.
+// Similar to a peek in a queue.
 func (b *MaxHeap) GetFirstValue() (any, error) {
 	if len(b.heap) <= 0 {
 		return nil, fmt.Errorf("max heap: get first value called on empty heap")
