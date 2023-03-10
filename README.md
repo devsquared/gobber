@@ -9,6 +9,7 @@ Gobber provides a framework for creating and executing jobs.
 - [ ] From the above, define interfaces of how to interface with the framework
     - How do we define producers?
     - How do we define consumers?
+    - What is a job? What is a task? What is the whole process? 
 
 ## Questions
 - [ ] Queue implementations and similar aren't really core to this. Should we move that out to separate repo?
