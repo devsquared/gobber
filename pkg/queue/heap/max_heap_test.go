@@ -2,7 +2,8 @@ package heap
 
 import (
 	"fmt"
-	"reflect"
+	"github.com/devsquared/gobber/pkg/queue/test"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 )
 
@@ -35,19 +36,19 @@ func TestBinaryHeap_Add(t *testing.T) {
 			expected:     []Node{NewNode(1, "hello!")},
 		},
 		{
-			name:         "add a node to a heap with key lower than rest",
+			name:         "add a node to a heap with Key lower than rest",
 			startingHeap: maxHeapWithHigh,
 			input:        NewNode(0, "konichiwa!"),
 			expected:     []Node{NewNode(99, "testing it all!"), NewNode(0, "konichiwa!")},
 		},
 		{
-			name:         "add a node to a heap with key higher than rest",
+			name:         "add a node to a heap with Key higher than rest",
 			startingHeap: maxHeapWithLow,
 			input:        NewNode(999999, "woah"),
 			expected:     []Node{NewNode(999999, "woah"), NewNode(0, "testing!")},
 		},
 		{
-			name:         "add a node to a heap with a key in between the rest",
+			name:         "add a node to a heap with a Key in between the rest",
 			startingHeap: maxHeapWithSpread,
 			input:        NewNode(50, "middle"),
 			expected:     []Node{NewNode(99, "haw"), NewNode(0, "yee"), NewNode(50, "middle")},
@@ -58,9 +59,9 @@ func TestBinaryHeap_Add(t *testing.T) {
 		// add the new input node
 		ts.startingHeap.Add(ts.input)
 
-		actualHeap := ts.startingHeap.heap
-		if !reflect.DeepEqual(actualHeap, ts.expected) {
-			t.Fatalf(reportTestFailure(ts.name, actualHeap, ts.expected))
+		actualHeap := ts.startingHeap.Heap
+		if !cmp.Equal(actualHeap, ts.expected) {
+			t.Fatalf(test.ReportTestFailure(ts.name, actualHeap, ts.expected))
 		}
 	}
 }
@@ -108,19 +109,15 @@ func TestMaxHeap_Pop(t *testing.T) {
 	for _, ts := range testScenarios {
 		actualValue, actualErr := ts.startingHeap.Pop()
 
-		if actualErr != nil && ts.expectedErr != nil {
-			if actualErr.Error() != ts.expectedErr.Error() {
-				t.Fatalf(reportTestFailure(ts.name, actualErr, ts.expectedErr))
-			}
-		}
+		test.CheckErrorsAreSame(actualErr, ts.expectedErr)
 
 		if actualValue != ts.expectedValue {
-			t.Fatalf(reportTestFailure(ts.name, actualValue, ts.expectedValue))
+			t.Fatalf(test.ReportTestFailure(ts.name, actualValue, ts.expectedValue))
 		}
 
-		actualHeap := ts.startingHeap.heap
-		if !reflect.DeepEqual(actualHeap, ts.expectedRemainingHeap) {
-			t.Fatalf(reportTestFailure(ts.name, actualHeap, ts.expectedRemainingHeap))
+		actualHeap := ts.startingHeap.Heap
+		if !cmp.Equal(actualHeap, ts.expectedRemainingHeap) {
+			t.Fatalf(test.ReportTestFailure(ts.name, actualHeap, ts.expectedRemainingHeap))
 		}
 	}
 }
@@ -150,9 +147,9 @@ func TestMaxHeap_GetFirstValue(t *testing.T) {
 
 	testScenarios := []scenario{
 		{
-			name:         "try to get first value from empty heap",
+			name:         "try to get first Value from empty heap",
 			heap:         NewMaxHeap(),
-			expectedErr:  fmt.Errorf("max heap: get first value called on empty heap"),
+			expectedErr:  fmt.Errorf("max heap: get first Value called on empty heap"),
 			expectedHeap: []Node{},
 		},
 		{
@@ -162,13 +159,13 @@ func TestMaxHeap_GetFirstValue(t *testing.T) {
 			expectedHeap:  []Node{NewNode(99, "testing it all!")},
 		},
 		{
-			name:          "get max value from heap with 2 nodes",
+			name:          "get max Value from heap with 2 nodes",
 			heap:          maxHeapWithSpread,
 			expectedValue: "haw",
 			expectedHeap:  []Node{NewNode(99, "haw"), NewNode(0, "yee")},
 		},
 		{
-			name:          "get max value from heap with multiple nodes",
+			name:          "get max Value from heap with multiple nodes",
 			heap:          maxHeapWithFiveNodes,
 			expectedValue: 999999,
 			expectedHeap:  []Node{NewNode(999999, 999999), NewNode(200, 200), NewNode(50, 50), NewNode(0, 0), NewNode(100, 100)},
@@ -178,24 +175,15 @@ func TestMaxHeap_GetFirstValue(t *testing.T) {
 	for _, ts := range testScenarios {
 		actualValue, actualErr := ts.heap.GetFirstValue()
 
-		if actualErr != nil && ts.expectedErr != nil {
-			if actualErr.Error() != ts.expectedErr.Error() {
-				t.Fatalf(reportTestFailure(ts.name, actualErr, ts.expectedErr))
-			}
-		}
+		test.CheckErrorsAreSame(actualErr, ts.expectedErr)
 
 		if actualValue != ts.expectedValue {
-			t.Fatalf(reportTestFailure(ts.name, actualValue, ts.expectedValue))
+			t.Fatalf(test.ReportTestFailure(ts.name, actualValue, ts.expectedValue))
 		}
 
-		actualHeap := ts.heap.heap
-		if !reflect.DeepEqual(actualHeap, ts.expectedHeap) {
-			t.Fatalf(reportTestFailure(ts.name, actualHeap, ts.expectedHeap))
+		actualHeap := ts.heap.Heap
+		if !cmp.Equal(actualHeap, ts.expectedHeap) {
+			t.Fatalf(test.ReportTestFailure(ts.name, actualHeap, ts.expectedHeap))
 		}
 	}
-}
-
-// likely to move out to a test package if we continue testing this way
-func reportTestFailure(scenarioName string, got, wanted any) string {
-	return fmt.Sprintf("scenario: %s \n\t got: %v, wanted: %v", scenarioName, got, wanted)
 }

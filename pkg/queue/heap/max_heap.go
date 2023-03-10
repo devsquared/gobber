@@ -11,85 +11,85 @@ import "fmt"
 
 // MaxHeap represents a heap with the max values towards the top
 type MaxHeap struct {
-	heap []Node
+	Heap []Node
 }
 
 // NewMaxHeap is a simple constructor to get a max heap.
 func NewMaxHeap() *MaxHeap {
 	return &MaxHeap{
-		heap: []Node{},
+		Heap: []Node{},
 	}
 }
 
 // Add inserts a new node into the MaxHeap. After adding, the MaxHeap fixes the remaining nodes ordering.
 func (b *MaxHeap) Add(node Node) {
-	b.heap = append(b.heap, node)
-	b.bubbleUp(len(b.heap) - 1) // bubble up the new node
+	b.Heap = append(b.Heap, node)
+	b.bubbleUp(len(b.Heap) - 1) // bubble up the new node
 }
 
 // Pop removes the max keyed node from the MaxHeap. After removing, the MaxHeap fixes the remaining nodes ordering.
 func (b *MaxHeap) Pop() (any, error) {
-	if len(b.heap) <= 0 {
+	if len(b.Heap) <= 0 {
 		return nil, fmt.Errorf("max heap: pop called on empty heap")
 	}
 
-	removed := b.heap[0]
-	heapSize := len(b.heap)
+	removed := b.Heap[0]
+	heapSize := len(b.Heap)
 
 	if heapSize > 1 {
-		b.heap[0] = b.heap[len(b.heap)-1]
+		b.Heap[0] = b.Heap[len(b.Heap)-1]
 	}
 
-	b.heap = b.heap[:len(b.heap)-1]
+	b.Heap = b.Heap[:len(b.Heap)-1]
 	b.bubbleDown(0)
 
-	return removed.value, nil
+	return removed.Value, nil
 }
 
-// GetFirstValue returns the value from the max node of the heap. This does not remove this node from the heap.
+// GetFirstValue returns the Value from the max node of the heap. This does not remove this node from the heap.
 // Similar to a peek in a queue.
 func (b *MaxHeap) GetFirstValue() (any, error) {
-	if len(b.heap) <= 0 {
-		return nil, fmt.Errorf("max heap: get first value called on empty heap")
+	if len(b.Heap) <= 0 {
+		return nil, fmt.Errorf("max heap: get first Value called on empty heap")
 	}
 
-	return b.heap[0].value, nil
+	return b.Heap[0].Value, nil
 }
 
 func (b *MaxHeap) bubbleUp(index int) {
 	for index > 0 {
 		parentIndex := getParentIndex(index)
 
-		if b.heap[parentIndex].key > b.heap[index].key {
+		if b.Heap[parentIndex].Key > b.Heap[index].Key {
 			// the node is now in the correct place and is bubbled up; we are done
 			return
 		}
 
-		b.heap[parentIndex], b.heap[index] = b.heap[index], b.heap[parentIndex] //swap the nodes
+		b.Heap[parentIndex], b.Heap[index] = b.Heap[index], b.Heap[parentIndex] //swap the nodes
 		index = parentIndex
 	}
 }
 
 func (b *MaxHeap) bubbleDown(index int) {
-	for 2*index+1 < len(b.heap) {
+	for 2*index+1 < len(b.Heap) {
 		minChildIndex := b.maxChildIndex(index)
 
-		if b.heap[minChildIndex].key < b.heap[index].key {
+		if b.Heap[minChildIndex].Key < b.Heap[index].Key {
 			// the node is now in the correct place and is bubbled down; we are done
 			return
 		}
 
-		b.heap[minChildIndex], b.heap[index] = b.heap[index], b.heap[minChildIndex]
+		b.Heap[minChildIndex], b.Heap[index] = b.Heap[index], b.Heap[minChildIndex]
 		index = minChildIndex
 	}
 }
 
 func (b *MaxHeap) maxChildIndex(index int) int {
-	if getRightIndex(index) >= len(b.heap) {
+	if getRightIndex(index) >= len(b.Heap) {
 		return getLeftIndex(index)
 	}
 
-	if b.heap[getRightIndex(index)].key > b.heap[getLeftIndex(index)].key {
+	if b.Heap[getRightIndex(index)].Key > b.Heap[getLeftIndex(index)].Key {
 		return getRightIndex(index)
 	}
 

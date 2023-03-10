@@ -7,14 +7,14 @@ type heap interface {
 }
 
 type Node struct {
-	key   int
-	value any
+	Key   int
+	Value any
 }
 
 // NewNode creates a simple node structure for use in a heap.
 func NewNode(key int, value any) Node {
 	return Node{
-		key:   key,
-		value: value,
+		Key:   key,
+		Value: value,
 	}
 }
