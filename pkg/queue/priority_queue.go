@@ -47,6 +47,11 @@ func (q *PriorityQueue) Pop() (any, error) {
 
 // Push enqueues an element onto the PriorityQueue. If an element is given that is not a PQItem, a priority of 0 is given.
 func (q *PriorityQueue) Push(element any) {
+	// in the case that an empty struct was used, let's initialize the underlying heap
+	if q.Heap == nil {
+		q.Heap = heap.NewMaxHeap()
+	}
+
 	var item PQItem
 	if reflect.ValueOf(element).Kind() != reflect.ValueOf(PQItem{}).Kind() {
 		item = PQItem{value: element, priority: 0}
