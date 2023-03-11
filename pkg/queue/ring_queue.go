@@ -1,6 +1,8 @@
 package queue
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Basic ring queue implementation with a basic slice of interface{}.
 // With this implementation of a ring queue, we utilize bit-masking to speed up the processes.
@@ -11,78 +13,88 @@ const minRingQueueSize = 16
 
 // RingQueue represents the ring buffer queue.
 type RingQueue struct {
-	buffer []any
-	head   int // marker of the head in the slice
-	tail   int // marker of the tail in the slice
-	count  int // length of the queues contents
+	Buffer []any
+	Head   int // marker of the head in the slice
+	Tail   int // marker of the tail in the slice
+	Count  int // length of the queues contents; NOT necessarily total length of queue's buffer
 }
 
 // NewRingQueue constructs a new RingQueue instance.
 func NewRingQueue() *RingQueue {
 	return &RingQueue{
-		buffer: make([]any, minRingQueueSize), //create a buffer the minimum size to begin
+		Buffer: make([]any, minRingQueueSize), //create a buffer the minimum size to begin
 	}
 }
 
 // Length gets the length of the queue currently.
 func (q *RingQueue) Length() int {
-	return q.count
+	return q.Count
 }
 
 // resize handles resizing the queue whenever it is needed. This will either double its length if space is needed
 // or it will shrink the size if the queue is less than half full.
 func (q *RingQueue) resize() {
 	//start by doubling the size
-	newBuffer := make([]any, q.count<<1)
+	newBuffer := make([]any, q.Count<<1)
 
 	//now appropriately copy the contents
-	if q.tail > q.head {
-		copy(newBuffer, q.buffer[q.head:q.tail])
+	if q.Tail > q.Head {
+		copy(newBuffer, q.Buffer[q.Head:q.Tail])
 	} else {
-		n := copy(newBuffer, q.buffer[q.head:])
-		copy(newBuffer[n:], q.buffer[:q.tail])
+		n := copy(newBuffer, q.Buffer[q.Head:])
+		copy(newBuffer[n:], q.Buffer[:q.Tail])
 	}
 
 	//now reset the values in the newly resized queue instance
-	q.head = 0
-	q.tail = q.count
-	q.buffer = newBuffer
+	q.Head = 0
+	q.Tail = q.Count
+	q.Buffer = newBuffer
 }
 
 // Push enqueues a new element on to the end of the queue.
 func (q *RingQueue) Push(element any) {
+	// if the element is nil, we don't need to add that
+	if element == nil {
+		return
+	}
+
+	// if the Buffer is uninitialized, let's initialize it
+	if q.Buffer == nil {
+		q.Buffer = make([]any, minRingQueueSize)
+	}
+
 	// if we have run out of room, let's resize
-	if q.count == len(q.buffer) {
+	if q.Count == len(q.Buffer) {
 		q.resize()
 	}
 
-	q.buffer[q.tail] = element
-	q.tail = (q.tail + 1) & (len(q.buffer) - 1) //bitwise modulus using AND
-	q.count++
+	q.Buffer[q.Tail] = element
+	q.Tail = (q.Tail + 1) & (len(q.Buffer) - 1) //bitwise modulus using AND
+	q.Count++
 }
 
 // Peek provides utility to see the front of the queue. Returns an error whenever the queue is empty.
 func (q *RingQueue) Peek() (any, error) {
 	// if the queue is empty, error
-	if q.count <= 0 {
+	if q.Count <= 0 {
 		return nil, fmt.Errorf("peek attempted on empty queue")
 	}
-	return q.buffer[q.head], nil
+	return q.Buffer[q.Head], nil
 }
 
 // Pop dequeues the element from the front of the queue and returns it. If the queue is empty, an error is returned.
 func (q *RingQueue) Pop() (any, error) {
 	// if the queue is empty, error
-	if q.count <= 0 {
+	if q.Count <= 0 {
 		return nil, fmt.Errorf("pop attempted on empty queue")
 	}
-	result := q.buffer[q.head]                  // get the result
-	q.buffer[q.head] = nil                      // remove result from queue
-	q.head = (q.head + 1) & (len(q.buffer) - 1) // bitwise modulus using AND
-	q.count--
+	result := q.Buffer[q.Head]                  // get the result
+	q.Buffer[q.Head] = nil                      // remove result from queue
+	q.Head = (q.Head + 1) & (len(q.Buffer) - 1) // bitwise modulus using AND
+	q.Count--
 
 	// if buffer is bigger than minimum size and 1/4 full, resize
-	if len(q.buffer) > minRingQueueSize && (q.count<<2) == len(q.buffer) {
+	if len(q.Buffer) > minRingQueueSize && (q.Count<<2) == len(q.Buffer) {
 		q.resize()
 	}
 

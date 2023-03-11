@@ -163,13 +163,17 @@ func TestPriorityQueue_Pop(t *testing.T) {
 	}
 
 	for _, ts := range testScenarios {
-		actualValue, actualErr := ts.queue.Peek()
+		actualValue, actualErr := ts.queue.Pop()
 
 		if actualValue != ts.expectedValue {
 			test.ReportTestFailure(ts.name, actualValue, ts.expectedValue)
 		}
 
 		test.CheckErrorsAreSame(actualErr, ts.expectedErr)
+
+		if ts.queue.Length() != ts.expectedLength {
+			test.ReportTestFailure(ts.name, ts.queue.Length(), ts.expectedLength)
+		}
 
 		if ts.queue.Length() != ts.expectedLength {
 			test.ReportTestFailure(ts.name, ts.queue.Length(), ts.expectedLength)
@@ -198,6 +202,9 @@ func TestPriorityQueue_Push(t *testing.T) {
 	pQueueWithMultipleItems.Push(PQItem{value: "hello", priority: 1})
 	pQueueWithMultipleItems.Push(PQItem{value: "hiya", priority: 2})
 
+	pQueueWithMultipleItemsWithPushedZeroPrio := pQueueWithMultipleItems
+	pQueueWithMultipleItemsWithPushedZeroPrio.Push("item")
+
 	testScenarios := []scenario{
 		{
 			name:           "push on empty struct",
@@ -205,6 +212,14 @@ func TestPriorityQueue_Push(t *testing.T) {
 			input:          nil,
 			expectedQueue:  NewPriorityQueue(),
 			expectedLength: 0,
+		},
+		{
+			// For this test, it is important to also test the casting to a PQItem in the case that wasn't given.
+			name:           "push non-PQItem to queue for casting and queueing at 0 priority",
+			queue:          pQueueWithMultipleItems,
+			input:          "item",
+			expectedQueue:  pQueueWithMultipleItemsWithPushedZeroPrio,
+			expectedLength: 3,
 		},
 		{
 			name:           "push on empty queue",
@@ -221,8 +236,6 @@ func TestPriorityQueue_Push(t *testing.T) {
 			expectedLength: 2,
 		},
 	}
-
-	// For this test, it is important to also test the casting to a PQItem in the case that wasn't given.
 
 	for _, ts := range testScenarios {
 		ts.queue.Push(ts.input)
